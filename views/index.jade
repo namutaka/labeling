@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  .page-header
+    h1= title
+
+
+  form#search(method='post').form.form-search
+    .input-append
+      input(type='text',name='query',class='search-query')
+      input(type='submit',class='btn')
+        | Search
+  #mails
+    div
+      span.label count
+      span= counts
+    table.mails.table.table-bordered.table-condensed
+      thead
+        tr
+          th Date
+          th Title
+          th fromto
+      tbody
+        - each mail in mails
+          tr(title=mail.id + '/' + mail.seqno)
+            td= util.dateFormat(mail.headers.date, 'yyyy-mm-dd')
+            td= mail.headers.subject
+            td= mail.headers.from
+
+
