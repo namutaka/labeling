@@ -13,12 +13,8 @@ results
 
 npm-debug.log
 
-*.js
 /.env
 /tmp
 /data
 /node_modules
-!/public/*/*.js
-!/public/*/*/*.js
-!/public/*/*/*/*.js
 
