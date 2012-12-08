@@ -17,11 +17,34 @@ body
   margin-right 20px
 
 #mails
+  height: 300px;
+  overflow-y: scroll;
+  border-top: 1px solid #CCC;
+  border-bottom: 1px solid #CCC;
+
   .mails
     margin 1em 0
     font-size 12px
+
     td
       padding: 2px 3px;
+      font-size: 13px;
+
+      .from
+        font-weight: bold
+
+    th.field-date
+      width: 120px
+
+    tbody
+      tr.mail
+        cursor: pointer
+
+      tr.selected
+        background: yellow
+
+#mailbody
+  min-height: 100px;
 
 #search
   .search-text

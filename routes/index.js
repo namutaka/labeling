@@ -1,9 +1,13 @@
 var util = require('util');
+util.dateFormat = require('../lib/utils').dateFormat;
+var _ = require('underscore')._;
 var MailProvider = require('../lib/mailprovider').MailProvider;
+
+var Labeling = require('../lib/labeling');
+
 //var MailConnector = require('../lib/mailconnector').MailConnector;
 var MailConnector = require('../lib/mailconnector_pop').MailConnector;
 
-util.dateFormat = require('../lib/utils').dateFormat;
 
 var mailProvider = new MailProvider('localhost', 27017);
 
@@ -16,19 +20,35 @@ var mail = new MailConnector({
   enabletls: true
 });
 
+var labeling = new Labeling();
+
 var filters = {
   0: {
     name: 'All',
     query: {}
-  },
-  1: {
-    name: 'ABC',
-    query: {
-      "headers.from": 'mail@direct-11.bk.mufg.jp'
-    }
   }
 };
 
+filters[2] = {
+  name: 'test',
+  query: {
+    "tag": 'test'
+  }
+};
+
+filters[3] = {
+    name: 'enquete',
+    query: {
+      "tag": 'enquete'
+    }
+};
+
+filters[4] = {
+  name: 'already_deleted',
+  query: {
+    "tag": 'already_deleted'
+  }
+};
 
 module.exports = function(app) {
   app.param('id', /^\d+$|^$/);
@@ -39,12 +59,21 @@ module.exports = function(app) {
       mailProvider.findAll(query, function(err, mails) {
         if (err) throw err;
 
+        var subtags = _.uniq(mails, false, function(mail) {
+          return mail.subtag;
+        });
+
+        mails = _.sortBy(mails, function(mail) {
+          return mail.subtag[0];
+        });
+
         res.render('index', {
           filterId: filterId,
           title: 'メール',
           mails: mails,
           counts: mails.length,
           util: util,
+          subtags: subtags,
           filters: filters
         });
       });
@@ -64,7 +93,7 @@ module.exports = function(app) {
     var fetch = mail.search('INBOX', query);
     var msg_cache = [];
     fetch.on('message', function(message) {
-      msg_cache.push(message);
+      msg_cache.push(labeling.labeling(message));
       if (msg_cache.length > 10) {
         mailProvider.save(msg_cache, function(err, messages) {
           if(err) throw err;

@@ -15,12 +15,34 @@ body > .container-fluid {
   font-weight: bold;
   margin-right: 20px;
 }
+#mails {
+  height: 300px;
+  overflow-y: scroll;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
 #mails .mails {
   margin: 1em 0;
   font-size: 12px;
 }
 #mails .mails td {
   padding: 2px 3px;
+  font-size: 13px;
+}
+#mails .mails td .from {
+  font-weight: bold;
+}
+#mails .mails th.field-date {
+  width: 120px;
+}
+#mails .mails tbody tr.mail {
+  cursor: pointer;
+}
+#mails .mails tbody tr.selected {
+  background: #ff0;
+}
+#mailbody {
+  min-height: 100px;
 }
 #search .search-text {
   width: 256px;

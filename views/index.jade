@@ -1,30 +1,40 @@
 extends layout
 
 block content
-  .page-header
-    h1= title
-
-
   form#search(method='post').form.form-search
-    .input-append
+    .input-append.pull-right
       input(type='text',name='query',class='search-query')
-      input(type='submit',class='btn')
-        | Search
-  #mails
+      input(type='submit',class='btn',value='Search')
     div
       span count:&nbsp
       span.badge= counts
+    - var prevSubTag = null
+  #mails
     table.mails.table.table-bordered.table-condensed
       thead
         tr
-          th Date
           th Title
-          th fromto
+          th tag
       tbody
         - each mail in mails
-          tr(title=mail.id + '/' + mail.seqno)
-            td= util.dateFormat(mail.headers.date, 'yyyy-mm-dd')
-            td= mail.headers.subject
-            td= mail.headers.from
+          - console.log(prevSubTag)
+          - if (prevSubTag != mail.subtag[0])
+            tr.subtagLabel
+              td(colspan=3)
+                span.label.label-info=mail.subtag[0]
+          - prevSubTag = mail.subtag[0]
 
+          tr(class='mail',title=mail.id + '/' + mail.seqno)
+            td
+              span.badge.pull-right= util.dateFormat(mail.headers.date, 'yyyy-mm-dd hh:MM:ss')
+              div.from= mail.headers.from
+              div.subject= mail.headers.subject
+              input(type='hidden',name='body',value=mail.text)
+            td
+              - each tag in mail.tag
+                span.label.label-success=tag
+              - each subtag in mail.subtag
+                span.label.label-info=subtag
+  #mailbody
+    pre
 
