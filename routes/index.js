@@ -1,6 +1,7 @@
 var util = require('util');
 var MailProvider = require('../lib/mailprovider').MailProvider;
-var MailConnector = require('../lib/mailconnector').MailConnector;
+//var MailConnector = require('../lib/mailconnector').MailConnector;
+var MailConnector = require('../lib/mailconnector_pop').MailConnector;
 
 util.dateFormat = require('../lib/utils').dateFormat;
 
@@ -9,9 +10,10 @@ var mailProvider = new MailProvider('localhost', 27017);
 var mail = new MailConnector({
   username: process.env['mail_username'],
   password: process.env['mail_password'],
-  host: 'imap.gmail.com',
-  port: 993,
-  secure: true
+  host: process.env['mail_host'],
+  port: process.env['mail_port'],
+  secure: true,
+  enabletls: true
 });
 
 var filters = {
@@ -60,13 +62,30 @@ module.exports = function(app) {
     var query = ['SEEN', ['SINCE', fromDate ]];
 
     var fetch = mail.search('INBOX', query);
+    var msg_cache = [];
     fetch.on('message', function(message) {
-      mailProvider.save(message, function(err, message) {
-        if(err) throw err;
+      msg_cache.push(message);
+      if (msg_cache.length > 10) {
+        mailProvider.save(msg_cache, function(err, messages) {
+          if(err) throw err;
+        });
+        msg_cache = [];
+      }
+    });
+
+    fetch.on('error', function(err) {
+      res.render('error', {
+        title: 'エラー',
+        error: err
       });
     });
 
     fetch.on('end', function() {
+      if (msg_cache.length > 0) {
+        mailProvider.save(msg_cache, function(err, messages) {
+          if(err) throw err;
+        });
+      }
       res.redirect('/');
     });
   });
